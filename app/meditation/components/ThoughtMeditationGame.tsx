@@ -944,9 +944,6 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
           <span className="text-amber-400 group-hover:scale-110 transition-transform">
             ✦
           </span>
-          <span className="font-cinzel text-sm sm:text-base font-semibold tracking-widest text-slate-100 group-hover:text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-            Pixel Stillness
-          </span>
         </button>
 
         <div className="flex items-center gap-3 sm:gap-4 text-xs font-display">
@@ -994,7 +991,7 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
       <div className="absolute top-[13%] sm:top-[16%] left-0 right-0 h-[120px] flex flex-col items-center justify-center text-center px-6 z-30 pointer-events-auto">
         {!isMeditating && !isCompleted && (
           <h1
-            className={`font-cinzel ext-4xl lg:text-6xl text-slate-100 font-medium tracking-wide drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-2xl leading-20 transition-all duration-700 ease-out transform ${
+            className={`font-cinzel text-4xl lg:text-6xl text-slate-100 font-medium tracking-wide drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-2xl leading-tight lg:leading-20 transition-all duration-700 ease-out transform ${
               isStartingMeditation
                 ? "opacity-0 -translate-y-3 blur-[2px]"
                 : "opacity-100 translate-y-0 blur-none"
@@ -1012,11 +1009,11 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
                 : "opacity-0 -translate-y-2 blur-[3px]"
             }`}
           >
-            <p className="font-cinzel text-4xl lg:text-6xl text-white font-normal tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)] leading-20">
+            <p className="font-cinzel text-3xl lg:text-6xl text-white font-normal tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)] leading-tight lg:leading-20">
               {displayPrompt.text}
             </p>
             {displayPrompt.subText && (
-              <p className="mt-2 font-display  text-cyan-200/90 font-light tracking-widest uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] text-xl">
+              <p className="mt-2   text-cyan-200/90 font-light tracking-widest uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] text-xl">
                 {displayPrompt.subText}
               </p>
             )}
@@ -1198,21 +1195,6 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
       </div>
 
       {/* 5. FOOTER (Pinned to bottom edge) */}
-      <footer className="absolute bottom-0 left-0 right-0 px-6 sm:px-10 py-5 flex items-center justify-between text-xs text-slate-400 font-display font-light pointer-events-auto z-40">
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/90 shadow-[0_0_8px_#00f0ff]" />
-          <span className="tracking-wider">
-            Cosmic Stillness • Pixel Thoughts Edition
-          </span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <span className="tracking-wide">
-            {config.meditationDuration === 60 ? "60s" : "120s"} •{" "}
-            {MEDITATION_TYPES[config.meditationType]?.name}
-          </span>
-        </div>
-      </footer>
     </div>
   );
 };
