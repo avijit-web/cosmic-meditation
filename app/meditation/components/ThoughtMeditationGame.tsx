@@ -991,7 +991,7 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
       <div className="absolute top-[13%] sm:top-[16%] left-0 right-0 h-[120px] flex flex-col items-center justify-center text-center px-6 z-30 pointer-events-auto">
         {!isMeditating && !isCompleted && (
           <h1
-            className={`font-cinzel text-4xl lg:text-6xl text-slate-100 font-medium tracking-wide drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-2xl leading-tight lg:leading-20 transition-all duration-700 ease-out transform ${
+            className={`font-cinzel text-2xl md:text-4xl lg:text-6xl text-slate-100 font-medium tracking-wide drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-2xl leading-tight lg:leading-20 transition-all duration-700 ease-out transform ${
               isStartingMeditation
                 ? "opacity-0 -translate-y-3 blur-[2px]"
                 : "opacity-100 translate-y-0 blur-none"
@@ -1009,11 +1009,11 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
                 : "opacity-0 -translate-y-2 blur-[3px]"
             }`}
           >
-            <p className="font-cinzel text-3xl lg:text-6xl text-white font-normal tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)] leading-tight lg:leading-20">
+            <p className="font-cinzel text-2xl md:text-4xl lg:text-6xl text-white font-normal tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)] leading-tight lg:leading-20">
               {displayPrompt.text}
             </p>
             {displayPrompt.subText && (
-              <p className="mt-2   text-cyan-200/90 font-light tracking-widest uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] text-xl">
+              <p className="mt-2   text-cyan-200/90 font-light tracking-widest uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] text-xl md:text-2xl lg:text-4xl">
                 {displayPrompt.subText}
               </p>
             )}
