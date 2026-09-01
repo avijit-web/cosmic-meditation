@@ -946,45 +946,47 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
           </span>
         </button>
 
-        <div className="flex items-center gap-3 sm:gap-4 text-xs font-display">
-          {isMeditating && (
-            <button
-              onClick={() => setIsPaused((prev) => !prev)}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition-all shadow-md font-medium tracking-wide"
-              title={isPaused ? "Resume meditation" : "Pause meditation"}
-            >
-              {isPaused ? (
-                <Play className="w-3.5 h-3.5 text-cyan-300" />
-              ) : (
-                <Pause className="w-3.5 h-3.5 text-slate-200" />
-              )}
-              <span>{isPaused ? "Resume" : "Pause"}</span>
-            </button>
-          )}
+        {!isMeditating && (
+          <div className="flex items-center gap-3 sm:gap-4 text-xs font-display">
+            {isMeditating && (
+              <button
+                onClick={() => setIsPaused((prev) => !prev)}
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition-all shadow-md font-medium tracking-wide"
+                title={isPaused ? "Resume meditation" : "Pause meditation"}
+              >
+                {isPaused ? (
+                  <Play className="w-3.5 h-3.5 text-cyan-300" />
+                ) : (
+                  <Pause className="w-3.5 h-3.5 text-slate-200" />
+                )}
+                <span>{isPaused ? "Resume" : "Pause"}</span>
+              </button>
+            )}
 
-          {isMeditating && (
-            <button
-              onClick={toggleMute}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition-all shadow-md"
-              title={isAudioMuted ? "Unmute audio" : "Mute audio"}
-            >
-              {isAudioMuted ? (
-                <VolumeX className="w-3.5 h-3.5 text-slate-400" />
-              ) : (
-                <Volume2 className="w-3.5 h-3.5 text-cyan-300" />
-              )}
-            </button>
-          )}
+            {isMeditating && (
+              <button
+                onClick={toggleMute}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition-all shadow-md"
+                title={isAudioMuted ? "Unmute audio" : "Mute audio"}
+              >
+                {isAudioMuted ? (
+                  <VolumeX className="w-3.5 h-3.5 text-slate-400" />
+                ) : (
+                  <Volume2 className="w-3.5 h-3.5 text-cyan-300" />
+                )}
+              </button>
+            )}
 
-          <button
-            onClick={onOpenCustomize}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-100 hover:text-white transition-all shadow-md font-medium tracking-wide"
-            title="Customize your meditation"
-          >
-            <Settings className="w-3.5 h-3.5 text-cyan-300" />
-            <span className="hidden sm:inline">Settings</span>
-          </button>
-        </div>
+            <button
+              onClick={onOpenCustomize}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-100 hover:text-white transition-all shadow-md font-medium tracking-wide"
+              title="Customize your meditation"
+            >
+              <Settings className="w-3.5 h-3.5 text-cyan-300" />
+              <span className="hidden sm:inline">Settings</span>
+            </button>
+          </div>
+        )}
       </header>
 
       {/* 2. PROMPT / GUIDANCE HEADING (Fixed Top Anchor - Zero Layout Shift) */}
@@ -1009,11 +1011,11 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
                 : "opacity-0 -translate-y-2 blur-[3px]"
             }`}
           >
-            <p className="font-cinzel text-2xl md:text-4xl lg:text-6xl text-white font-normal tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)] leading-tight lg:leading-20">
+            <p className="font-cinzel text-3xl md:text-4xl lg:text-6xl text-white font-normal tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)] leading-tight lg:leading-20">
               {displayPrompt.text}
             </p>
             {displayPrompt.subText && (
-              <p className="mt-2   text-cyan-200/90 font-light tracking-widest uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] text-xl md:text-2xl lg:text-4xl">
+              <p className="mt-2   text-cyan-200/90 font-light tracking-widest uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] text-lg  lg:text-4xl">
                 {displayPrompt.subText}
               </p>
             )}
