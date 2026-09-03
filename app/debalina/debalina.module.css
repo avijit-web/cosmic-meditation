@@ -1,0 +1,64 @@
+/* Route root. The app's global stylesheet locks <body> to overflow:hidden,
+   user-select:none and a dark background, so this wrapper is its own
+   full-viewport scroll canvas with its own tokens. Nothing here leaks out. */
+
+.root {
+  --maroon: #401818;
+  --maroon-2: #5c2626;
+  --maroon-deep: #2a0f0f;
+  --tint: #f7efea;
+  --tint-2: #efe2da;
+  --line: rgba(64, 24, 24, 0.18);
+  --ink: #2e1b1b;
+  --muted: #8a7068;
+  --on-dark: #ead5cc;
+  --sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --serif: var(--font-fraunces), "Fraunces", Georgia, "Times New Roman", serif;
+
+  position: fixed;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+.root,
+.root * {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.root a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.root button {
+  font-family: inherit;
+}
+
+.root :focus-visible {
+  outline: 2px solid var(--maroon);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    scroll-behavior: auto;
+  }
+  .root * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

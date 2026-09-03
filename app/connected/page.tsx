@@ -3,6 +3,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { CosmicCanvas } from "../meditation/components/CosmicCanvas";
 import { ConnectedBreathGame } from "./components/ConnectedBreathGame";
+import CountryProvider from "./components/CountryProvider";
 import type { CelestialStats, UniverseConfig } from "../meditation/types";
 
 /**
@@ -52,7 +53,11 @@ export default function ConnectedBreathPage() {
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-[#010206] text-slate-100 font-sans">
       <CosmicCanvas config={config} onStatsUpdate={handleStatsUpdate} />
-      <ConnectedBreathGame />
+      {/* Looks the visitor up by IP while the idle screen is showing, so
+          "This is you" already knows where you are by the time it plays. */}
+      <CountryProvider>
+        <ConnectedBreathGame />
+      </CountryProvider>
     </main>
   );
 }

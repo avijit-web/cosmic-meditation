@@ -1,0 +1,140 @@
+.zone {
+  position: relative;
+  text-align: center;
+  width: 250px;
+}
+
+.mascot {
+  width: 100%;
+  display: block;
+  animation: floaty 5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.jump {
+  animation: beatjump 0.55s ease-out;
+}
+
+@keyframes beatjump {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-22px) scale(1.05, 0.96);
+  }
+  70% {
+    transform: translateY(0) scale(0.97, 1.03);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.blink {
+  animation: blink 4.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.b2 {
+  animation-delay: 0.07s;
+}
+
+@keyframes blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  95%,
+  97% {
+    transform: scaleY(0.06);
+  }
+}
+
+.arm {
+  transform-origin: 198px 118px;
+  animation: wavehand 3s ease-in-out infinite;
+}
+
+@keyframes wavehand {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  8% {
+    transform: rotate(-24deg);
+  }
+  16% {
+    transform: rotate(4deg);
+  }
+  24% {
+    transform: rotate(-24deg);
+  }
+  32% {
+    transform: rotate(0);
+  }
+}
+
+.speech {
+  position: absolute;
+  top: -52px;
+  right: -10px;
+  z-index: 3;
+  background: #fff;
+  color: var(--maroon);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.4;
+  padding: 15px 20px;
+  max-width: 180px;
+  border-radius: 60% 55% 58% 62% / 58% 60% 55% 60%;
+  box-shadow: 0 16px 32px -14px rgba(0, 0, 0, 0.5);
+  animation: floaty 5s ease-in-out infinite reverse;
+}
+
+.speech::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  left: 28px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50% 50% 60% 40%;
+  transform: rotate(20deg);
+}
+
+.speechPop {
+  animation: floaty 5s ease-in-out infinite reverse, pop 0.4s ease-out;
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0.4;
+    scale: 0.92;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+.caption {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--on-dark);
+  margin-top: 12px;
+}

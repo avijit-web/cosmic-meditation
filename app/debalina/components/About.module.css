@@ -1,0 +1,132 @@
+.about {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 120px 36px;
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.visual {
+  position: relative;
+  justify-self: center;
+}
+
+.arch {
+  width: min(320px, 78vw);
+  height: min(400px, 96vw);
+  border-radius: 999px 999px 18px 18px;
+  background: linear-gradient(170deg, #8a4636, #401818);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  position: relative;
+  box-shadow: 0 40px 70px -40px rgba(42, 15, 15, 0.7);
+}
+
+.arch::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px 999px 14px 14px;
+  pointer-events: none;
+}
+
+.est {
+  position: absolute;
+  right: -16px;
+  bottom: 30px;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--maroon);
+  color: var(--maroon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spinring 26s linear infinite;
+}
+
+.est span {
+  animation: spinring 26s linear infinite reverse;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-align: center;
+  line-height: 1.4;
+}
+
+@keyframes spinring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--maroon);
+  display: block;
+  margin-bottom: 18px;
+}
+
+.title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(34px, 4.4vw, 54px);
+  line-height: 1.12;
+  color: var(--maroon);
+  margin-bottom: 26px;
+}
+
+.copy p {
+  font-size: 15.5px;
+  line-height: 1.85;
+  color: var(--muted);
+  margin-bottom: 16px;
+  max-width: 56ch;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 26px;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--maroon);
+  border: 1px solid var(--maroon);
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: #fff;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.badge:hover {
+  background: var(--maroon);
+  color: #fff;
+}
+
+@media (max-width: 880px) {
+  .about {
+    grid-template-columns: 1fr;
+    gap: 56px;
+    padding: 90px 22px;
+  }
+}

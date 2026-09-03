@@ -7,23 +7,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Play, Pause, RotateCcw, Volume2, VolumeX, Globe2 } from "lucide-react";
+import { RotateCcw, Globe2 } from "lucide-react";
 import { breathAudio } from "../audio/breathAudio";
 import { LAYER_VOLUMES } from "../audio/layers";
-import {
-  BREATH_SCRIPT,
-  SESSION_SECONDS,
-  STEP_GLOBE_FROM,
-  STEP_START_TIMES,
-} from "../data/script";
-import {
-  COHORT_SIZE,
-  INITIAL_COHORT,
-  PARTICIPANTS_BY_ID,
-  TOTAL_PARTICIPANTS,
-  YOU,
-  toCountryMarkers,
-} from "../data/participants";
+import { toCountryMarkers } from "../data/participants";
+import { buildSession, type BreathSession } from "../data/session";
 import { BreathPhase, Participant, ScriptStep } from "../types";
 import {
   clamp01,
@@ -41,6 +29,8 @@ import { GlobeStage } from "./GlobeStage";
 import type { GlobeView } from "./GlobeInner";
 import { OrbitStars, type StarView } from "./OrbitStars";
 import { BreathOrb } from "./BreathOrb";
+import { useCountry } from "./CountryProvider";
+import { LiveCount } from "./LiveCount";
 
 /**
  * Fraction of the globe canvas actually filled by the sphere at our resting
@@ -57,6 +47,8 @@ const STAR_APPEAR_SECONDS = 1.0;
 const STAR_STAGGER_SECONDS = 0.34;
 /** Auto-rotation rate for the beats that show the whole circle. */
 const SWEEP_SPIN_SPEED = 3.2;
+/** Below this width the stage is allowed to fill the whole viewport. */
+const PHONE_BREAKPOINT = 640;
 
 const EMPTY_VIEW: GlobeView = { focus: null, markers: [], spinSpeed: 0.5 };
 
@@ -83,7 +75,7 @@ function sameView(a: GlobeView, b: GlobeView): boolean {
   });
 }
 
-type Status = "idle" | "running" | "paused" | "complete";
+type Status = "idle" | "running" | "complete";
 
 interface StarMeta {
   key: string;
@@ -101,10 +93,12 @@ interface DisplayText {
 }
 
 export function ConnectedBreathGame() {
+  const visitorCountry = useCountry();
+
   const [stageSize, setStageSize] = useState(460);
   const [status, setStatus] = useState<Status>("idle");
-  const [isMuted, setIsMuted] = useState(false);
   const [globeReady, setGlobeReady] = useState(false);
+  const [session, setSession] = useState<BreathSession | null>(null);
 
   const [display, setDisplay] = useState<DisplayText>({});
   const [textFade, setTextFade] = useState<"in" | "out">("in");
@@ -119,13 +113,13 @@ export function ConnectedBreathGame() {
   const orbRef = useRef<HTMLDivElement>(null);
   const starNodes = useRef<Map<string, HTMLDivElement>>(new Map());
 
+  /** The loop reads the session from here so it never closes over stale state. */
+  const sessionRef = useRef<BreathSession | null>(null);
   const starsRef = useRef<StarMeta[]>([]);
   /** Everyone who has joined the circle so far, for the "all" beats. */
   const joinedRef = useRef<Participant[]>([]);
   const seedCounter = useRef(0);
   const startTimeRef = useRef(0);
-  const pausedAccumRef = useRef(0);
-  const pauseStartRef = useRef(0);
   const rafRef = useRef(0);
   const stepIndexRef = useRef(-1);
   const textTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -138,18 +132,32 @@ export function ConnectedBreathGame() {
     setView((prev) => (sameView(prev, next) ? prev : next));
   }, []);
 
-  // The rAF loop reads status without re-subscribing, so pausing never tears
-  // down and rebuilds the frame callback.
+  // The rAF loop reads status from a ref so it can bail out cleanly the frame
+  // after the session ends, without re-subscribing.
   const statusRef = useRef<Status>(status);
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
 
+  // --- the circle for this visit --------------------------------------------
+  // Drawn once the visitor's country is known (or known to be unknown), so the
+  // idle screen's headcount and "This is you" agree. Redrawn on every restart.
+  useEffect(() => {
+    if (visitorCountry === undefined) return;
+    if (statusRef.current !== "idle") return;
+    const next = buildSession(visitorCountry);
+    sessionRef.current = next;
+    setSession(next);
+  }, [visitorCountry]);
+
   // --- responsive stage ------------------------------------------------------
   useEffect(() => {
     const measure = () => {
-      const byWidth = window.innerWidth * 0.85;
-      const byHeight = window.innerHeight * 0.7;
+      const phone = window.innerWidth < PHONE_BREAKPOINT;
+      // On a phone the globe is the whole show, so let the stage run edge to
+      // edge; the sphere itself only fills ~72% of it.
+      const byWidth = window.innerWidth * (phone ? 1.0 : 0.85);
+      const byHeight = window.innerHeight * (phone ? 0.62 : 0.7);
       setStageSize(Math.max(260, Math.min(620, byWidth, byHeight)));
     };
     measure();
@@ -210,6 +218,9 @@ export function ConnectedBreathGame() {
   // --- per-step side effects -------------------------------------------------
   const enterStep = useCallback(
     (step: ScriptStep, index: number) => {
+      const current = sessionRef.current;
+      if (!current) return;
+
       setPhase(step.phase);
       swapText({
         eyebrow: step.eyebrow,
@@ -219,9 +230,9 @@ export function ConnectedBreathGame() {
 
       if (step.breathCue) breathAudio.cue(step.breathCue);
 
-      const stepStart = STEP_START_TIMES[index];
+      const stepStart = current.stepStartTimes[index];
       const participant = step.participantId
-        ? PARTICIPANTS_BY_ID[step.participantId]
+        ? current.byId[step.participantId]
         : undefined;
 
       // 1. Bring in whoever this beat introduces, before we work out what to
@@ -231,13 +242,13 @@ export function ConnectedBreathGame() {
       if (step.introduces === "self") {
         // Your star materialises late in `reveal`, exactly as the orb dims.
         introducedKeys = addStars(
-          YOU,
+          current.you,
           stepStart + step.duration - STAR_APPEAR_SECONDS,
         );
       } else if (step.introduces === "cohort") {
         // Everyone already here arrives together, fanned out over the beat.
-        introducedKeys = INITIAL_COHORT.flatMap((p, i) =>
-          addStars(p, stepStart + 0.5 + i * 0.55),
+        introducedKeys = current.cohort.flatMap((p, i) =>
+          addStars(p, stepStart + 0.5 + i * 0.45),
         );
       } else if (step.introduces === "participant" && participant) {
         introducedKeys = addStars(participant, stepStart + 0.4);
@@ -245,6 +256,7 @@ export function ConnectedBreathGame() {
 
       // 2. Point the camera and light up the map.
       const mode = step.focusMode ?? "none";
+      const you = current.you;
 
       if (mode === "all") {
         applyView({
@@ -254,9 +266,9 @@ export function ConnectedBreathGame() {
         });
       } else if (mode === "self") {
         applyView({
-          focus: { lat: YOU.lat, lng: YOU.lng },
+          focus: { lat: you.lat, lng: you.lng },
           // `reveal` flies the camera over with no highlight; `you` names it.
-          markers: step.phase === "reveal" ? [] : toCountryMarkers([YOU]),
+          markers: step.phase === "reveal" ? [] : toCountryMarkers([you]),
         });
       } else if (mode === "participant" && participant) {
         applyView({
@@ -271,7 +283,9 @@ export function ConnectedBreathGame() {
       if (mode === "all") {
         setSpotlight(new Set(starsRef.current.map((s) => s.key)));
       } else if (mode === "self") {
-        setSpotlight(new Set(starsRef.current.filter((s) => s.isYou).map((s) => s.key)));
+        setSpotlight(
+          new Set(starsRef.current.filter((s) => s.isYou).map((s) => s.key)),
+        );
       } else if (mode === "participant" && participant) {
         const keys = introducedKeys.length
           ? introducedKeys
@@ -283,8 +297,7 @@ export function ConnectedBreathGame() {
         setSpotlight(new Set());
       }
 
-      // 4. Sound.
-      // Let the pad go with the closing sequence; the wind stays underneath.
+      // 4. Sound: let the pad go with the closing sequence; the wind stays.
       if (step.phase === "converge" && !musicFadedRef.current) {
         musicFadedRef.current = true;
         breathAudio.setLayer("space", 0, 7);
@@ -386,11 +399,12 @@ export function ConnectedBreathGame() {
       rafRef.current = requestAnimationFrame(tick);
       if (statusRef.current !== "running") return;
 
+      const current = sessionRef.current;
+      if (!current) return;
+      const { script, stepStartTimes, stepGlobeFrom, total } = current;
+
       const now = performance.now();
-      const elapsed = Math.max(
-        0,
-        (now - startTimeRef.current - pausedAccumRef.current) / 1000,
-      );
+      const elapsed = Math.max(0, (now - startTimeRef.current) / 1000);
 
       // Which beat are we on? Walk through every step we have passed rather
       // than jumping straight to the current one — a backgrounded tab starves
@@ -398,8 +412,8 @@ export function ConnectedBreathGame() {
       // during them.
       let index = Math.max(0, stepIndexRef.current);
       while (
-        index + 1 < BREATH_SCRIPT.length &&
-        elapsed >= STEP_START_TIMES[index + 1]
+        index + 1 < script.length &&
+        elapsed >= stepStartTimes[index + 1]
       ) {
         index++;
       }
@@ -407,11 +421,11 @@ export function ConnectedBreathGame() {
       while (stepIndexRef.current < index) {
         const next = stepIndexRef.current + 1;
         stepIndexRef.current = next;
-        enterStep(BREATH_SCRIPT[next], next);
+        enterStep(script[next], next);
       }
 
-      const step = BREATH_SCRIPT[index];
-      const local = elapsed - STEP_START_TIMES[index];
+      const step = script[index];
+      const local = elapsed - stepStartTimes[index];
       const progress = Number.isFinite(step.duration)
         ? clamp01(local / step.duration)
         : clamp01(local / 2);
@@ -420,7 +434,7 @@ export function ConnectedBreathGame() {
       // Every beat starts where the last one ended, so the scale is continuous
       // across the whole session — no jumps at beat boundaries.
       const globeScale = lerp(
-        STEP_GLOBE_FROM[index],
+        stepGlobeFrom[index],
         step.globeTo,
         ease(step.ease ?? "inOut", progress),
       );
@@ -437,14 +451,10 @@ export function ConnectedBreathGame() {
       if (step.phase === "converge") {
         // Starts once the stars are visibly on their way in, and lands on the
         // full count before the beat ends.
-        const counted = Math.round(
-          TOTAL_PARTICIPANTS * clamp01((progress - 0.15) / 0.6),
-        );
+        const counted = Math.round(total * clamp01((progress - 0.15) / 0.6));
         setTally((prev) => (prev === counted ? prev : counted));
       } else if (step.phase === "complete") {
-        setTally((prev) =>
-          prev === TOTAL_PARTICIPANTS ? prev : TOTAL_PARTICIPANTS,
-        );
+        setTally((prev) => (prev === total ? prev : total));
       }
     };
 
@@ -462,26 +472,27 @@ export function ConnectedBreathGame() {
 
   // Layer 2: the space pad joins once the meditation itself starts.
   useEffect(() => {
-    if (status === "running" || status === "paused") {
+    if (status === "running") {
       breathAudio.setLayer("space", LAYER_VOLUMES.space, 6);
     } else {
       breathAudio.setLayer("space", 0, 3);
     }
   }, [status]);
 
-  useEffect(() => {
-    breathAudio.setMuted(isMuted);
-  }, [isMuted]);
-
   // --- controls ---------------------------------------------------------------
   const handleStart = useCallback(() => {
+    // Use the circle the idle screen already promised ("15 people are
+    // breathing right now"), so the headcount doesn't change on the way in.
+    // Restarts re-roll it — see handleReset / handleRestart.
+    const next = sessionRef.current ?? buildSession(visitorCountry);
+    sessionRef.current = next;
+    setSession(next);
+
     starsRef.current = [];
     joinedRef.current = [];
     starNodes.current.clear();
     seedCounter.current = 0;
     stepIndexRef.current = -1;
-    pausedAccumRef.current = 0;
-    pauseStartRef.current = 0;
     musicFadedRef.current = false;
     startTimeRef.current = performance.now();
 
@@ -493,24 +504,7 @@ export function ConnectedBreathGame() {
     setTextFade("in");
     setView(EMPTY_VIEW);
     setStatus("running");
-  }, []);
-
-  const handlePauseToggle = useCallback(() => {
-    setStatus((prev) => {
-      if (prev === "running") {
-        pauseStartRef.current = performance.now();
-        return "paused";
-      }
-      if (prev === "paused") {
-        if (pauseStartRef.current) {
-          pausedAccumRef.current += performance.now() - pauseStartRef.current;
-          pauseStartRef.current = 0;
-        }
-        return "running";
-      }
-      return prev;
-    });
-  }, []);
+  }, [visitorCountry]);
 
   const handleReset = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
@@ -530,6 +524,11 @@ export function ConnectedBreathGame() {
     setView(EMPTY_VIEW);
     setStatus("idle");
 
+    // Back on the idle screen a different group of people has "shown up".
+    const next = buildSession(visitorCountry);
+    sessionRef.current = next;
+    setSession(next);
+
     // The wind carries on underneath; only the meditation layers stop.
     breathAudio.setLayer("ambient", LAYER_VOLUMES.ambient, 3);
 
@@ -537,7 +536,13 @@ export function ConnectedBreathGame() {
     if (globeWrapRef.current) {
       globeWrapRef.current.style.transform = `scale(${GLOBE_IDLE_SCALE})`;
     }
-  }, []);
+  }, [visitorCountry]);
+
+  /** "Breathe again": a new circle, straight into the session. */
+  const handleRestart = useCallback(() => {
+    sessionRef.current = buildSession(visitorCountry);
+    handleStart();
+  }, [handleStart, visitorCountry]);
 
   // Park the globe at its idle size before (and after) a session.
   useEffect(() => {
@@ -561,13 +566,15 @@ export function ConnectedBreathGame() {
       ? "opacity-100 translate-y-0 blur-none"
       : "opacity-0 -translate-y-2 blur-[3px]";
 
-  const inSession = status === "running" || status === "paused";
+  const inSession = status === "running";
   const showTally = status === "complete";
+  const canStart = globeReady && session !== null;
 
   const subtitle = useMemo(() => {
-    const minutes = Math.round((SESSION_SECONDS / 60) * 2) / 2;
+    const seconds = session?.sessionSeconds ?? 110;
+    const minutes = Math.round((seconds / 60) * 2) / 2;
     return `A ${minutes}-minute group meditation where we breathe as one`;
-  }, []);
+  }, [session]);
 
   return (
     <div className="fixed inset-0 z-20 overflow-hidden select-none">
@@ -600,50 +607,15 @@ export function ConnectedBreathGame() {
         </div>
       </div>
 
-      {/* ---- Header controls -------------------------------------------------- */}
-      <header className="absolute top-0 left-0 right-0 px-6 sm:px-10 py-5 flex items-center justify-between z-50">
-        <span className="flex items-center gap-2 text-amber-300/90 text-sm font-display tracking-wide">
-          <Globe2 className="w-4 h-4" />
-          <span className="hidden sm:inline">Connected Breath</span>
-        </span>
-
-        {inSession && (
-          <div className="flex items-center gap-3 text-xs font-display">
-            <button
-              onClick={handlePauseToggle}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition-all shadow-md font-medium tracking-wide"
-              title={status === "paused" ? "Resume" : "Pause"}
-            >
-              {status === "paused" ? (
-                <Play className="w-3.5 h-3.5 text-cyan-300" />
-              ) : (
-                <Pause className="w-3.5 h-3.5 text-slate-200" />
-              )}
-              <span>{status === "paused" ? "Resume" : "Pause"}</span>
-            </button>
-
-            <button
-              onClick={() => setIsMuted((m) => !m)}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition-all shadow-md"
-              title={isMuted ? "Unmute" : "Mute"}
-            >
-              {isMuted ? (
-                <VolumeX className="w-3.5 h-3.5 text-slate-400" />
-              ) : (
-                <Volume2 className="w-3.5 h-3.5 text-cyan-300" />
-              )}
-            </button>
-
-            <button
-              onClick={handleReset}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition-all shadow-md"
-              title="Leave the circle"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-      </header>
+      {/* ---- Wordmark (idle only — the session itself is just sky) -------- */}
+      {status === "idle" && (
+        <header className="absolute top-0 left-0 right-0 px-6 sm:px-10 py-5 flex items-center z-50 pointer-events-none">
+          <span className="flex items-center gap-2 text-amber-300/90 text-sm font-display tracking-wide">
+            <Globe2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Connected Breath</span>
+          </span>
+        </header>
+      )}
 
       {/* ---- Guidance copy (fixed box, so nothing ever reflows) --------------- */}
       {inSession && !showTally && (
@@ -697,14 +669,16 @@ export function ConnectedBreathGame() {
           <div className="absolute left-0 right-0 bottom-[9%] flex flex-col items-center gap-4 px-6 pointer-events-auto">
             <button
               onClick={handleStart}
-              disabled={!globeReady}
+              disabled={!canStart}
               className="px-10 py-3.5 rounded-xl bg-[#a85832] hover:bg-[#ba6339] active:scale-95 disabled:opacity-50 disabled:active:scale-100 text-white font-display font-semibold text-xs sm:text-sm tracking-[0.2em] uppercase transition-all shadow-[0_6px_30px_rgba(168,88,50,0.55)] border border-amber-400/30"
             >
-              {globeReady ? "Start web experience" : "Preparing the world…"}
+              {canStart ? "Start web experience" : "Preparing the world…"}
             </button>
-            <p className="text-[11px] text-slate-500 font-display tracking-wide">
-              {COHORT_SIZE} people are breathing right now
-            </p>
+            <div className="min-h-[30px] flex items-center">
+              {session && (
+                <LiveCount key={session.cohortSize} base={session.cohortSize} />
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -727,7 +701,7 @@ export function ConnectedBreathGame() {
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 pointer-events-auto">
               <button
-                onClick={handleStart}
+                onClick={handleRestart}
                 className="flex items-center gap-2 px-7 py-3 rounded-full bg-[#a85832] hover:bg-[#ba6339] text-white text-xs font-display font-semibold tracking-wider uppercase transition-all shadow-[0_4px_25px_rgba(168,88,50,0.5)]"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -744,14 +718,6 @@ export function ConnectedBreathGame() {
         </div>
       )}
 
-      {/* ---- Paused veil --------------------------------------------------------- */}
-      {status === "paused" && (
-        <div className="absolute inset-0 z-50 flex items-end justify-center pb-[9%] pointer-events-none">
-          <span className="px-4 py-1.5 rounded-full bg-black/50 border border-white/10 text-[11px] uppercase tracking-[0.32em] text-slate-300 font-display">
-            Paused
-          </span>
-        </div>
-      )}
     </div>
   );
 }
