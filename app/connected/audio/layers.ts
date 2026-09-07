@@ -1,33 +1,31 @@
 /**
- * Audio sources for the three layers of the session.
- *
- * ⚠️ PLACEHOLDERS — replace the URLs below with your own files.
- *
- * Heads up: Pexels only hosts photos and video, not audio, so these URLs will
- * 404. That is deliberate and harmless — `breathAudio` treats a failed layer as
- * silence and the session runs exactly the same without it. Drop local files in
- * `/public` (e.g. "/ambient-wind.mp3") or point these at your own CDN.
- *
- * Free audio that does work out of the box: Pixabay, Freesound, or the two
- * ambient tracks already sitting in `/public` from the single-player route.
+ * Audio sources for the three layers of the session. Files live in
+ * `/public/audios`; the paths are URI-encoded because two of the names carry
+ * spaces.
  */
+const audio = (file: string) => encodeURI(`/audios/${file}`);
+
 export const AUDIO_SOURCES = {
-  /** Layer 1 — soft wind / room tone. Runs from the idle screen onwards. */
-  ambient: "https://www.pexels.com/download/audio/ambient-wind-loop.mp3",
-  /** Layer 2 — space pad. Fades in on top once the meditation starts. */
-  space: "https://www.pexels.com/download/audio/deep-space-ambient-pad.mp3",
-  /** Layer 3a — a one-shot drone that rises with each inhale. */
-  inhale: "https://www.pexels.com/download/audio/breath-in-drone.mp3",
-  /** Layer 3b — a one-shot drone that falls with each exhale. */
-  exhale: "https://www.pexels.com/download/audio/breath-out-drone.mp3",
+  /** Layer 1 — the bed. Runs from the idle screen onwards, never stops. */
+  ambient: audio("meditation Session 1_mixdown.mp3"),
+  /** Layer 2 — joins on top of the bed once the meditation starts. */
+  space: audio("Meditation Session 2_mixdown.mp3"),
+  /** Layer 3a — one-shot, rises with each inhale. */
+  inhale: audio("inhale.mp3"),
+  /** Layer 3b — one-shot, falls with each exhale. */
+  exhale: audio("exhale.mp3"),
 } as const;
 
 export type AudioLayerId = keyof typeof AUDIO_SOURCES;
 
-/** Resting volume of each layer, before the master mute is applied. */
+/**
+ * Resting volume of each layer. The two mixdowns sit lower than the breath
+ * cues so a cue always reads over the bed rather than under it — tune here if
+ * either mix comes in hotter than expected.
+ */
 export const LAYER_VOLUMES: Record<AudioLayerId, number> = {
-  ambient: 0.3,
-  space: 0.42,
-  inhale: 0.5,
-  exhale: 0.5,
+  ambient: 0.32,
+  space: 0.4,
+  inhale: 0.55,
+  exhale: 0.55,
 };

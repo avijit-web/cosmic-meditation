@@ -8,8 +8,8 @@ import { AUDIO_SOURCES, AudioLayerId, LAYER_VOLUMES } from "./layers";
  *  3. `inhale` / `exhale` — one-shot drones cued on each breath
  *
  * Every layer is best-effort: a missing or blocked file is treated as silence,
- * so the session never depends on audio loading. That matters here because the
- * URLs in `layers.ts` ship as placeholders.
+ * so the session never depends on audio loading — a bad path or a blocked
+ * autoplay degrades to a quiet run, not a broken one.
  */
 
 const FADE_TICK_MS = 50;
@@ -108,7 +108,8 @@ class BreathAudio {
       failed: false,
     };
 
-    // A placeholder URL 404s here. Mark the layer dead so we stop retrying.
+    // A missing or undecodable file lands here. Mark the layer dead so the
+    // fade loop and the autoplay retry both leave it alone.
     el.addEventListener("error", () => {
       loop.failed = true;
       if (loop.timer) clearInterval(loop.timer);
