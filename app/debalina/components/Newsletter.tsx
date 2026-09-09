@@ -1,18 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import styles from "./Newsletter.module.css";
+import { LeadForm } from "../../components/lead/LeadForm";
 
 export default function Newsletter() {
   const [done, setDone] = useState(false);
-
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
-    if (!email) return;
-    // No backend wired yet — swap this for a real signup call when ready.
-    setDone(true);
-  };
 
   return (
     <section className={styles.section} id="join">
@@ -31,16 +24,11 @@ export default function Newsletter() {
             you&apos;re in, lovely ✦ watch your inbox
           </p>
         ) : (
-          <form className={styles.form} onSubmit={onSubmit}>
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="your email, lovely…"
-              aria-label="Email address"
-            />
-            <button type="submit">Join ✦</button>
-          </form>
+          // The same form that gates the meditations; the wrapper sets its
+          // palette so it reads as cream-on-maroon here.
+          <div className={styles.formTheme}>
+            <LeadForm onSubmit={() => setDone(true)} submitLabel="Join ✦" />
+          </div>
         )}
       </div>
     </section>

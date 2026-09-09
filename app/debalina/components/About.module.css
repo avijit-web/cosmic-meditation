@@ -25,7 +25,16 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   position: relative;
+  /* The portrait is clipped to the arch; the gradient stays as the backdrop
+     while the image loads. */
+  overflow: hidden;
   box-shadow: 0 40px 70px -40px rgba(42, 15, 15, 0.7);
+}
+
+.arch img {
+  object-fit: cover;
+  /* Portraits: keep the face, crop from the bottom. */
+  object-position: center top;
 }
 
 .arch::before {
@@ -35,6 +44,8 @@
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px 999px 14px 14px;
   pointer-events: none;
+  /* Above the photo, so the inner ring still reads. */
+  z-index: 1;
 }
 
 .est {

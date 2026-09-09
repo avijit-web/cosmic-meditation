@@ -1,6 +1,8 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import styles from "./Hero.module.css";
+import shared from "./shared.module.css";
 
 const ROLES = [
   "Silva Method Instructor",
@@ -18,7 +20,7 @@ export default function Hero() {
     <header className={styles.hero} id="top">
       <div className={styles.copy}>
         <div className={styles.eyebrow}>
-          <span>Silva Method · Manifestation · Feminine Energy</span>
+          <span>Meditate with</span>
           <span className={styles.line} aria-hidden="true" />
           <Sparkle />
         </div>
@@ -34,14 +36,18 @@ export default function Hero() {
           ))}
         </div>
 
-        <p className={styles.bio}>
-          A certified Silva Method instructor, she brings warmth, wisdom, and
-          deep precision to every session. Her speciality lies in Manifestation
-          — helping people use the power of the Alpha mind to consciously
-          create what they truly desire, be it health, abundance,
-          relationships, or purpose. Participants often describe her sessions
-          as turning points they didn&apos;t see coming.
-        </p>
+        <div className={styles.bio}>
+          <p className={styles.quote}>
+            Meditation allows the Caterpillar to know it is a butterfly.
+          </p>
+          <p className={styles.invite}>
+            Let&apos;s try a 1 Minute guided Meditation together?
+          </p>
+          {/* Scrolls to "Meditation is very Simple" further down the page. */}
+          <Link className={shared.btn} href="#apps">
+            Start The Meditation
+          </Link>
+        </div>
 
         <div className={styles.signature}>
           <Image

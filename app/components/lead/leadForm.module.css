@@ -1,0 +1,174 @@
+/*
+ * Lead form — themed entirely through CSS variables so the host decides the
+ * palette. Defaults give a light-on-dark look; the newsletter section and the
+ * in-game gate each override the handful they care about.
+ *
+ *   --lead-fg          text and lines at full strength
+ *   --lead-fg-soft     placeholders, secondary
+ *   --lead-line        resting underline
+ *   --lead-accent      errors and the invalid underline
+ *   --lead-serif       the italic input face
+ *   --lead-bg          used to keep browser autofill from painting white
+ *   --lead-btn-fg      button text when hovered (bg becomes --lead-fg)
+ */
+
+.form {
+  --lead-fg: #fff;
+  --lead-fg-soft: rgba(255, 255, 255, 0.45);
+  --lead-line: rgba(255, 255, 255, 0.6);
+  --lead-accent: #f5c8a0;
+  --lead-serif: Georgia, "Times New Roman", serif;
+  --lead-bg: #111;
+  --lead-btn-fg: #111;
+
+  display: grid;
+  /* minmax(0, …) lets rows shrink below their content's natural width —
+     without it the 245-option select forces the whole form wider than a
+     narrow host like the in-game card. */
+  grid-template-columns: minmax(0, 1fr);
+  /* Roomy enough that an inline error never touches the row below it. */
+  gap: 32px;
+  width: 100%;
+  max-width: 480px;
+  min-width: 0;
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* One underlined row per field. */
+.field {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  border-bottom: 1px solid var(--lead-line);
+  transition: border-color 0.2s;
+}
+
+.field:focus-within {
+  border-color: var(--lead-fg);
+}
+
+.field[data-invalid="true"] {
+  border-color: var(--lead-accent);
+}
+
+.field input,
+.field select {
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 13px 4px;
+  color: var(--lead-fg);
+  font-family: var(--lead-serif);
+  font-style: italic;
+  font-size: 17px;
+}
+
+.field input {
+  flex: 1 1 0;
+  width: 100%;
+}
+
+.field input::placeholder {
+  color: var(--lead-fg-soft);
+}
+
+/* Chrome paints a white autofill background; keep the host's colour. */
+.field input:-webkit-autofill {
+  -webkit-text-fill-color: var(--lead-fg);
+  box-shadow: 0 0 0 1000px var(--lead-bg) inset;
+  transition: background-color 9999s;
+}
+
+/* ---------- country code + number on one line ---------- */
+
+.phoneRow select {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 44%;
+  padding-right: 22px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  font-style: normal;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  /* a small chevron, drawn inline so it inherits the text colour */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23fff' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+}
+
+/* The dropdown itself is native and light; make sure it stays readable. */
+.phoneRow select option {
+  color: #111;
+  background: #fff;
+  font-style: normal;
+}
+
+.phoneRow input {
+  padding-left: 14px;
+  border-left: 1px solid var(--lead-line);
+}
+
+/* ---------- inline errors ---------- */
+
+.error {
+  position: absolute;
+  left: 4px;
+  top: 100%;
+  margin-top: 6px;
+  font-family: var(--lead-serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--lead-accent);
+  animation: leadFade 0.3s ease-out;
+}
+
+/* ---------- submit ---------- */
+
+.form button {
+  justify-self: center;
+  margin-top: 14px;
+  background: transparent;
+  border: 1px solid var(--lead-line);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--lead-fg);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  padding: 14px 34px;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.form button:hover {
+  background: var(--lead-fg);
+  color: var(--lead-btn-fg);
+  border-color: var(--lead-fg);
+}
+
+@keyframes leadFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .form {
+    gap: 34px;
+  }
+
+  .phoneRow select {
+    max-width: 38%;
+    font-size: 14px;
+  }
+}

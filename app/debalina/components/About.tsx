@@ -1,4 +1,8 @@
+import Image from "next/image";
 import styles from "./About.module.css";
+
+/** Portrait shown in the arch. Drop the file in /public/images to swap it. */
+const PORTRAIT = "/images/image.png";
 
 const BADGES = [
   "TEDx Speaker",
@@ -13,7 +17,15 @@ export default function About() {
   return (
     <section className={styles.about} id="about">
       <div className={styles.visual}>
-        <div className={styles.arch}>ADD PHOTO</div>
+        <div className={styles.arch}>
+          <Image
+            src={PORTRAIT}
+            alt="Debalina Chatterjee"
+            fill
+            sizes="(max-width: 700px) 78vw, 320px"
+            priority
+          />
+        </div>
         <div className={styles.est}>
           <span>
             EST.

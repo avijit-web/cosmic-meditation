@@ -588,7 +588,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Sparkles,
   Settings,
-  RotateCcw,
   Volume2,
   VolumeX,
   Play,
@@ -596,7 +595,6 @@ import {
   Clock,
   User,
   Music,
-  CheckCircle2,
 } from "lucide-react";
 import { UniverseConfig } from "../types";
 import {
@@ -605,6 +603,9 @@ import {
 } from "../data/meditationScripts";
 import { MUSIC_TRACKS } from "../audio/musicTracks";
 import { musicController } from "../audio/musicController";
+import { CompletionPanel } from "./CompletionPanel";
+
+import { LeadGate } from "../../components/lead/LeadGate";
 
 interface ThoughtMeditationGameProps {
   config: UniverseConfig;
@@ -620,6 +621,12 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
   const [thoughtInput, setThoughtInput] = useState<string>("");
   const [activeThought, setActiveThought] = useState<string>("");
   const [isMeditating, setIsMeditating] = useState<boolean>(false);
+  /**
+   * The introduce-yourself step. Every "Done" opens it; the form's submit
+   * flips this ref and calls the start handler again, the only way past it.
+   */
+  const [gateOpen, setGateOpen] = useState(false);
+  const leadReadyRef = useRef(false);
   const [isStartingMeditation, setIsStartingMeditation] =
     useState<boolean>(false);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
@@ -858,6 +865,14 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
     if (e) e.preventDefault();
     if (isStartingMeditation || isMeditating) return;
 
+    // "Done" opens the lead form instead; its submit sets the ref and calls
+    // back into this handler, and the thought they typed is still in state.
+    if (!leadReadyRef.current) {
+      setGateOpen(true);
+      return;
+    }
+    leadReadyRef.current = false;
+
     const cleanText = thoughtInput.trim() || "stress";
     setActiveThought(cleanText);
     setIsStartingMeditation(true);
@@ -990,10 +1005,10 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
       </header>
 
       {/* 2. PROMPT / GUIDANCE HEADING (Fixed Top Anchor - Zero Layout Shift) */}
-      <div className="absolute top-[13%] sm:top-[16%] left-0 right-0 h-[120px] flex flex-col items-center justify-center text-center px-6 z-30 pointer-events-auto">
+      <div className="absolute left-0 right-0 bottom-[calc(50%+142px)] flex flex-col items-center justify-end text-center px-6 z-30 pointer-events-auto">
         {!isMeditating && !isCompleted && (
           <h1
-            className={`font-cinzel text-2xl md:text-4xl lg:text-6xl text-slate-100 font-medium tracking-wide drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-2xl leading-tight lg:leading-20 transition-all duration-700 ease-out transform ${
+            className={`font-cinzel text-2xl md:text-3xl lg:text-4xl text-slate-100 font-medium tracking-wide drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] max-w-2xl leading-snug transition-all duration-700 ease-out transform ${
               isStartingMeditation
                 ? "opacity-0 -translate-y-3 blur-[2px]"
                 : "opacity-100 translate-y-0 blur-none"
@@ -1011,39 +1026,27 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
                 : "opacity-0 -translate-y-2 blur-[3px]"
             }`}
           >
-            <p className="font-cinzel text-3xl md:text-4xl lg:text-6xl text-white font-normal tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)] leading-tight lg:leading-20">
+            <p className="font-cinzel text-2xl md:text-3xl lg:text-4xl text-white font-normal tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)] leading-snug">
               {displayPrompt.text}
             </p>
             {displayPrompt.subText && (
-              <p className="mt-2   text-cyan-200/90 font-light tracking-widest uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] text-lg  lg:text-4xl">
+              <p className="mt-2   text-cyan-200/90 font-light tracking-wider uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] text-sm md:text-base lg:text-lg max-w-xl">
                 {displayPrompt.subText}
               </p>
             )}
           </div>
         )}
 
-        {isCompleted && (
-          <div
-            className={`flex flex-col items-center justify-center max-w-2xl space-y-2 transition-all duration-1000 ease-out transform ${
-              isCompletionVisible
-                ? "opacity-100 translate-y-0 blur-none"
-                : "opacity-0 translate-y-4 blur-[3px]"
-            }`}
-          >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-xs font-display font-medium tracking-wider mb-1 shadow-sm">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
-              <span>Thought Dissolved</span>
-            </div>
-            <h2 className="font-cinzel text-2xl sm:text-3xl md:text-4xl text-white font-medium tracking-wide drop-shadow-[0_4px_30px_rgba(0,0,0,0.95)]">
-              Life is much bigger than this moment.
-            </h2>
-            <p className="font-display text-xs sm:text-sm text-slate-300 max-w-lg mx-auto font-light tracking-wide leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
-              Your thought has dissolved into the infinite cosmos. Take a deep
-              breath and carry this quiet peace with you.
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* Final page: share, next steps, how it works (scrollable overlay) */}
+      {isCompleted && (
+        <CompletionPanel
+          visible={isCompletionVisible}
+          onReset={handleReset}
+          onOpenCustomize={onOpenCustomize}
+        />
+      )}
 
       {/* 3. THE LUMINOUS STAR ORB (Permanently Centered at 50vw / 50vh with GPU hardware scaling) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none z-20 w-[260px] h-[260px]">
@@ -1169,32 +1172,17 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
           </div>
         )}
 
-        {/* Completion Action Buttons */}
-        {isCompleted && (
-          <div
-            className={`flex flex-wrap items-center justify-center gap-3 pt-2 transition-all duration-1000 delay-300 ease-out transform ${
-              isCompletionVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-3"
-            }`}
-          >
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-2 px-7 py-3 rounded-full bg-[#a85832] hover:bg-[#ba6339] text-white text-xs font-display font-semibold tracking-wider uppercase transition-all shadow-[0_4px_25px_rgba(168,88,50,0.5)]"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Release Another Thought</span>
-            </button>
-
-            <button
-              onClick={onOpenCustomize}
-              className="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-slate-100 hover:text-white text-xs font-display font-medium tracking-wide transition-all shadow-md"
-            >
-              Customize Meditation
-            </button>
-          </div>
-        )}
       </div>
+
+      <LeadGate
+        open={gateOpen}
+        onCaptured={() => {
+          leadReadyRef.current = true;
+          setGateOpen(false);
+          handleStartMeditation();
+        }}
+        lead="Tell us who's releasing this thought, and we'll take you straight in."
+      />
 
       {/* 5. FOOTER (Pinned to bottom edge) */}
     </div>

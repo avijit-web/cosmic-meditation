@@ -31,6 +31,7 @@ import { OrbitStars, type StarView } from "./OrbitStars";
 import { BreathOrb } from "./BreathOrb";
 import { useCountry } from "./CountryProvider";
 import { LiveCount } from "./LiveCount";
+import { LeadGate } from "../../components/lead/LeadGate";
 
 /**
  * Fraction of the globe canvas actually filled by the sphere at our resting
@@ -99,6 +100,12 @@ export function ConnectedBreathGame() {
   const [status, setStatus] = useState<Status>("idle");
   const [globeReady, setGlobeReady] = useState(false);
   const [session, setSession] = useState<BreathSession | null>(null);
+  /**
+   * The introduce-yourself step. Every Start opens it; the form's submit
+   * flips this ref and calls Start again, which is the only way past it.
+   */
+  const [gateOpen, setGateOpen] = useState(false);
+  const leadReadyRef = useRef(false);
 
   const [display, setDisplay] = useState<DisplayText>({});
   const [textFade, setTextFade] = useState<"in" | "out">("in");
@@ -481,6 +488,14 @@ export function ConnectedBreathGame() {
 
   // --- controls ---------------------------------------------------------------
   const handleStart = useCallback(() => {
+    // Nobody breathes with the circle anonymously: Start opens the lead form,
+    // and only the form's submit (which sets the ref) gets past this line.
+    if (!leadReadyRef.current) {
+      setGateOpen(true);
+      return;
+    }
+    leadReadyRef.current = false;
+
     // Use the circle the idle screen already promised ("15 people are
     // breathing right now"), so the headcount doesn't change on the way in.
     // Restarts re-roll it — see handleReset / handleRestart.
@@ -612,7 +627,7 @@ export function ConnectedBreathGame() {
         <header className="absolute top-0 left-0 right-0 px-6 sm:px-10 py-5 flex items-center z-50 pointer-events-none">
           <span className="flex items-center gap-2 text-amber-300/90 text-sm font-display tracking-wide">
             <Globe2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Connected Breath</span>
+            <span className="hidden sm:inline">Universal Breathing </span>
           </span>
         </header>
       )}
@@ -658,7 +673,7 @@ export function ConnectedBreathGame() {
         <div className="absolute inset-0 z-40 pointer-events-none">
           <div className="absolute left-0 right-0 top-[9%] h-[17%] flex flex-col items-center justify-end text-center px-6">
             <h1 className="font-cinzel text-4xl sm:text-5xl lg:text-6xl text-white font-medium tracking-wide drop-shadow-[0_4px_28px_rgba(0,0,0,0.95)]">
-              Connected Breath
+              Universal Breathing
               <span className="text-amber-300">.</span>
             </h1>
             <p className="mt-3 max-w-md text-sm sm:text-base text-slate-300 font-display font-light leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
@@ -682,6 +697,16 @@ export function ConnectedBreathGame() {
           </div>
         </div>
       )}
+
+      <LeadGate
+        open={gateOpen}
+        onCaptured={() => {
+          leadReadyRef.current = true;
+          setGateOpen(false);
+          handleStart();
+        }}
+        lead="Tell us who's breathing with the circle, and we'll take you straight in."
+      />
 
       {/* ---- Closing tally ------------------------------------------------------ */}
       {showTally && (
@@ -717,7 +742,6 @@ export function ConnectedBreathGame() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -37,8 +37,8 @@
   -webkit-user-select: text;
 }
 
+/* colour is left to each component (preflight already makes <a> inherit) */
 .root a {
-  color: inherit;
   text-decoration: none;
 }
 

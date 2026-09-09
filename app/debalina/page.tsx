@@ -3,8 +3,9 @@ import Hero, { HeroBand } from "./components/Hero";
 import Marquee from "./components/Marquee";
 import PixelThoughts from "./components/PixelThoughts";
 import About from "./components/About";
-import Offerings from "./components/Offerings";
+import UpcomingClasses from "./components/UpcomingClasses";
 import Testimonial from "./components/Testimonial";
+import VideoTestimonials from "./components/VideoTestimonials";
 import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
 import Reveal from "./components/Reveal";
@@ -23,10 +24,13 @@ export default function DebalinaPage() {
           <About />
         </Reveal>
         <Reveal>
-          <Offerings />
+          <UpcomingClasses />
         </Reveal>
         <Reveal>
           <Testimonial />
+        </Reveal>
+        <Reveal>
+          <VideoTestimonials />
         </Reveal>
         <Reveal>
           <Newsletter />

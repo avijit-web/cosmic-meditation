@@ -4,20 +4,36 @@ import styles from "./ToolCards.module.css";
 import shared from "./shared.module.css";
 
 type ToolCardProps = {
-  no: string;
+  /** e.g. "Meditation 1" */
+  label: string;
   title: string;
+  /** the tool behind the meditation and what it does, e.g. ["Pixel Thoughts", "Release stress"] */
+  tool?: [name: string, effect: string];
   text: string;
   cta: string;
   href: string;
   demo: ReactNode;
 };
 
-export function ToolCard({ no, title, text, cta, href, demo }: ToolCardProps) {
+export function ToolCard({
+  label,
+  title,
+  tool,
+  text,
+  cta,
+  href,
+  demo,
+}: ToolCardProps) {
   return (
     <Link className={styles.tool} href={href}>
       <div className={styles.window}>{demo}</div>
-      <span className={styles.no}>{no}</span>
+      <span className={styles.no}>{label}</span>
       <h3 className={styles.title}>{title}</h3>
+      {tool && (
+        <span className={styles.tag}>
+          {tool[0]} <span aria-hidden="true">→</span> {tool[1]}
+        </span>
+      )}
       <p className={styles.text}>{text}</p>
       <span className={shared.link}>
         {cta} <span aria-hidden="true">→</span>
