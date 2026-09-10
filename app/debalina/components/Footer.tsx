@@ -5,8 +5,6 @@ const LINKS = [
   { href: "#apps", label: "Meditations" },
   { href: "#about", label: "About" },
   { href: "#classes", label: "Classes" },
-  { href: "#", label: "Speaking" },
-  { href: "#", label: "Contact" },
 ];
 
 export default function Footer() {

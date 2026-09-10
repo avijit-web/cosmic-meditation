@@ -12,12 +12,9 @@ export default function Newsletter() {
       <div className={styles.inner}>
         <span className={styles.kicker}>The weekly letter</span>
         <h2 className={styles.title}>
-          Ready to feel <em>magnetic?</em>
+          Ready to raise your <em>vibration?</em>
         </h2>
-        <p className={styles.lead}>
-          One gentle note a week — a meditation, a manifestation prompt, and a
-          little love from Beat. No noise, ever.
-        </p>
+        <p className={styles.lead}>Let&apos;s stay connected</p>
 
         {done ? (
           <p className={styles.done} aria-live="polite">
@@ -27,7 +24,11 @@ export default function Newsletter() {
           // The same form that gates the meditations; the wrapper sets its
           // palette so it reads as cream-on-maroon here.
           <div className={styles.formTheme}>
-            <LeadForm onSubmit={() => setDone(true)} submitLabel="Join ✦" />
+            <LeadForm
+              onSubmit={() => setDone(true)}
+              submitLabel="Join the community ✦"
+              source="debalina"
+            />
           </div>
         )}
       </div>

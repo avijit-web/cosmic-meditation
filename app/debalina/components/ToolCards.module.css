@@ -44,6 +44,15 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+.capLg {
+  top: 26px;
+  padding: 0 14%;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .no {
   font-family: var(--serif);
   font-style: italic;

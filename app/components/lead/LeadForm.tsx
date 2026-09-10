@@ -5,6 +5,7 @@ import { isValidPhoneNumber, parsePhoneNumber } from "libphonenumber-js/min";
 import styles from "./leadForm.module.css";
 import { DEFAULT_DIAL_ISO, DIAL_BY_ISO, DIAL_CODES } from "./dialCodes";
 import type { Lead } from "./types";
+import { submitLead } from "./submitLead";
 
 interface Values {
   fullName: string;
@@ -58,10 +59,16 @@ function validate(v: Values): Errors {
 }
 
 interface LeadFormProps {
-  /** Called once the values pass validation. */
+  /**
+   * Called once the values pass validation and the webhook has been called.
+   * Fires even if the webhook failed — a network blip must never block the
+   * reader; the failure is logged instead.
+   */
   onSubmit: (lead: Lead) => void;
   submitLabel?: string;
   className?: string;
+  /** Which surface the lead came from; sent along to the webhook. */
+  source?: "debalina" | "connected" | "meditation";
 }
 
 /**
@@ -77,10 +84,12 @@ export function LeadForm({
   onSubmit,
   submitLabel = "Join ✦",
   className,
+  source = "debalina",
 }: LeadFormProps) {
   const [values, setValues] = useState<Values>(EMPTY);
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const errors = validate(values);
   // Errors only appear once a field has been visited, or once the reader has
@@ -98,10 +107,10 @@ export function LeadForm({
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitted(true);
-    if (Object.keys(errors).length > 0) return;
+    if (Object.keys(errors).length > 0 || sending) return;
 
     const country = DIAL_BY_ISO[values.countryIso];
     // Validation already passed, so this parses; it also normalises things
@@ -119,9 +128,10 @@ export function LeadForm({
       capturedAt: new Date().toISOString(),
     };
 
-    // Nothing is stored client-side by design. This log is the hand-off point:
-    // replace it with the API call when the backend exists.
-    console.log("lead captured", lead);
+    // Nothing is stored client-side; the lead goes straight to the n8n webhook.
+    setSending(true);
+    await submitLead(lead, source);
+    setSending(false);
     onSubmit(lead);
   };
 
@@ -205,7 +215,9 @@ export function LeadForm({
         )}
       </div>
 
-      <button type="submit">{submitLabel}</button>
+      <button type="submit" disabled={sending} aria-busy={sending}>
+        {sending ? "Sending…" : submitLabel}
+      </button>
     </form>
   );
 }

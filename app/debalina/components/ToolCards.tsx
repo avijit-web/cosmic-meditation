@@ -47,7 +47,7 @@ export function ToolCard({
 const MINI_STARS: { left: string; top: string; warm?: boolean; delay?: string }[] = [
   { left: "16%", top: "30%" },
   { left: "32%", top: "58%", warm: true, delay: "0.8s" },
-  { left: "50%", top: "22%", delay: "1.5s" },
+  { left: "50%", top: "40%", delay: "1.5s" },
   { left: "68%", top: "48%", warm: true, delay: "0.4s" },
   { left: "82%", top: "30%", delay: "1.1s" },
   { left: "26%", top: "76%", delay: "2s" },
@@ -56,7 +56,11 @@ const MINI_STARS: { left: string; top: string; warm?: boolean; delay?: string }[
 export function ShrinkDemo() {
   return (
     <>
-      <span className={styles.cap}>Now playing</span>
+      <span className={`${styles.cap} ${styles.capLg}`}>
+        Release what&apos;s
+        <br />
+        bothering you
+      </span>
       {MINI_STARS.map((s, i) => (
         <span
           key={i}

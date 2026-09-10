@@ -11,6 +11,8 @@ interface LeadGateProps {
   title?: string;
   lead?: string;
   submitLabel?: string;
+  /** Which game this gate sits in front of; sent along to the webhook. */
+  source: "connected" | "meditation";
 }
 
 /**
@@ -27,6 +29,7 @@ export function LeadGate({
   title = "Before we begin",
   lead = "Tell us who's breathing with us, and we'll take you straight in.",
   submitLabel = "Begin ✦",
+  source,
 }: LeadGateProps) {
   if (!open) return null;
 
@@ -70,7 +73,11 @@ export function LeadGate({
 
         {/* Asked on every start by design, and always blank — nothing is
             remembered between sessions. */}
-        <LeadForm onSubmit={onCaptured} submitLabel={submitLabel} />
+        <LeadForm
+          onSubmit={onCaptured}
+          submitLabel={submitLabel}
+          source={source}
+        />
       </div>
     </div>
   );

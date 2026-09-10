@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Star } from "lucide-react";
 import styles from "./UpcomingClasses.module.css";
 
@@ -22,7 +21,7 @@ const CLASSES: ClassItem[] = [
     tagline: "Turn your emotions into art & experience inner healing.",
     rating: 4.8,
     reviews: 96,
-    href: "#",
+    href: "https://www.silvamethod.in/healing-through-art/",
   },
   {
     title: "Silva Intuition System Course",
@@ -31,7 +30,7 @@ const CLASSES: ClassItem[] = [
     tagline: "Train your mind to recognize and trust intuitive insights.",
     rating: 4.9,
     reviews: 212,
-    href: "#",
+    href: "https://www.silvamethod.in/silva-intuition-course/",
   },
   {
     title: "Silva Method Graduation Course",
@@ -41,16 +40,18 @@ const CLASSES: ClassItem[] = [
       "Go beyond the basics & learn Silva Method techniques at a deeper level.",
     rating: 4.9,
     reviews: 318,
-    href: "#",
+    href: "https://www.silvamethod.in/basic-lecture-series/",
   },
   {
     title: "Millionaire Mindset Workshop",
+    image:
+      "https://www.silvamethod.in/courses/new_assets/ChatGPT%20Image%20Jul%2031,%202026,%2011_28_07%20AM%20(1).png",
     // No photo yet — drop one in /public/images and add `image: "/images/…"`.
     daysLeft: 18,
     tagline: "Rewire your thinking for wealth, growth & success.",
     rating: 4.8,
     reviews: 71,
-    href: "#",
+    href: "https://www.silvamethod.in/courses/millionaire-mindset/",
   },
   {
     title: "Silva Method Retreat",
@@ -59,7 +60,7 @@ const CLASSES: ClassItem[] = [
     tagline: "Disconnect from the noise & reconnect with yourself.",
     rating: 4.7,
     reviews: 54,
-    href: "#",
+    href: "https://www.silvamethod.in/courses/goa-retreat-2026/",
   },
 ];
 
@@ -78,10 +79,9 @@ export default function UpcomingClasses() {
           <article key={c.title} className={styles.card}>
             <div className={styles.media}>
               {c.image ? (
-                <Image
+                <img
                   src={c.image}
                   alt={c.title}
-                  fill
                   sizes="(max-width: 560px) 92vw, (max-width: 820px) 46vw, (max-width: 1180px) 31vw, 19vw"
                 />
               ) : (

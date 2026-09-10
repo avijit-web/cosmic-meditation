@@ -700,6 +700,7 @@ export function ConnectedBreathGame() {
 
       <LeadGate
         open={gateOpen}
+        source="connected"
         onCaptured={() => {
           leadReadyRef.current = true;
           setGateOpen(false);

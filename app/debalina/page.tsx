@@ -26,9 +26,9 @@ export default function DebalinaPage() {
         <Reveal>
           <UpcomingClasses />
         </Reveal>
-        <Reveal>
+        {/* <Reveal>
           <Testimonial />
-        </Reveal>
+        </Reveal> */}
         <Reveal>
           <VideoTestimonials />
         </Reveal>

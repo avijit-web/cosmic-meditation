@@ -1176,6 +1176,7 @@ export const ThoughtMeditationGame: React.FC<ThoughtMeditationGameProps> = ({
 
       <LeadGate
         open={gateOpen}
+        source="meditation"
         onCaptured={() => {
           leadReadyRef.current = true;
           setGateOpen(false);

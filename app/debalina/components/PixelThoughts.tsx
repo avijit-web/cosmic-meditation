@@ -34,22 +34,21 @@ export default function PixelThoughts() {
       </span>
 
       <div className={styles.head}>
-        <span className={styles.kicker}>Free mind-calming tools</span>
+        {/* <span className={styles.kicker}>Free mind-calming tools</span> */}
         <h2 className={styles.title}>
           Meditation is very Simple. <em>Let me show you</em>
         </h2>
-        <p>
+        {/* <p>
           Certified Silva International instructor with 8+ years training
           meditation practitioners across India and abroad. Specialising in
           intuition development, manifestation, and feminine energy work.
-        </p>
+        </p> */}
       </div>
 
       <div className={styles.grid}>
         <ToolCard
           label="Meditation 1"
           title="Get rid of Overthinking/Worries in 1 minute"
-          tool={["Pixel Thoughts", "Release stress"]}
           text="Type the worry looping in your head, then watch it shrink into a tiny star among millions. Sixty seconds to a lighter mind."
           cta="Shrink a worry"
           href="/meditation"
@@ -68,7 +67,6 @@ export default function PixelThoughts() {
         <ToolCard
           label="Meditation 2"
           title="Universal Breathing"
-          tool={["Connected Breath", "Breathe together"]}
           text="Inhale… exhale… together. Sync your breathing with women around the world and feel the quiet magic of breathing as one."
           cta="Breathe together"
           href="/connected"

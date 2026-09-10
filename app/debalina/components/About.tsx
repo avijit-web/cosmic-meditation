@@ -36,10 +36,8 @@ export default function About() {
       </div>
 
       <div className={styles.copy}>
-        <span className={styles.kicker}>Meet your guide</span>
-        <h2 className={styles.title}>
-          Your manifestation fairygodmother is here.
-        </h2>
+        <span className={styles.kicker}>Meet your meditation partner</span>
+        <h2 className={styles.title}>Debalina</h2>
         <p>
           I&apos;m Debalina — a TEDx speaker, certified Silva International
           instructor, and lifelong believer that a woman who calms her mind can

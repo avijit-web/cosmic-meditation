@@ -151,6 +151,15 @@
   border-color: var(--lead-fg);
 }
 
+/* While the webhook call is in flight. */
+.form button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+  background: transparent;
+  color: var(--lead-fg);
+  border-color: var(--lead-line);
+}
+
 @keyframes leadFade {
   from {
     opacity: 0;
